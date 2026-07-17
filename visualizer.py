@@ -155,7 +155,7 @@ def show_images(img1, title1, img2, title2, kernel=None, kernel_name=""):
     # Nếu có kernel
     if kernel is not None:
         draw_kernel_on_ax(axes[0, 2], kernel, f"Ma trận Kernel")
-        draw_kernel_stats_on_ax(axes[1, 2], kernel, kernel_name)
+        axes[1, 2].axis('off')
     
     plt.tight_layout()
     plt.show()
