@@ -53,7 +53,7 @@ def show_images(img1, title1, img2, title2):
     plt.show()
 
 def show_all_filters(img):
-    """Hiển thị ảnh gốc và tất cả các bộ lọc chính trên cùng một khung hình"""
+    """Hiển thị ảnh gốc và tất cả 8 phương pháp lọc trên cùng một khung hình (lưới 3x3)"""
     disp_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) if len(img.shape) == 3 else img
     
     # 1. Ảnh gốc
@@ -75,21 +75,46 @@ def show_all_filters(img):
     res_bilateral = cv2.bilateralFilter(img, 9, 75, 75)
     res_bilateral_rgb = cv2.cvtColor(res_bilateral, cv2.COLOR_BGR2RGB) if len(res_bilateral.shape) == 3 else res_bilateral
     
-    # 6. Laplacian (ksize = 3)
+    # 6. Làm sắc nét (Sharpen 3x3)
+    kernel_sharpen = np.array([[ 0, -1,  0],
+                               [-1,  5, -1],
+                               [ 0, -1,  0]], dtype=np.float32)
+    res_sharpen = cv2.filter2D(img, -1, kernel_sharpen)
+    res_sharpen_rgb = cv2.cvtColor(res_sharpen, cv2.COLOR_BGR2RGB) if len(res_sharpen.shape) == 3 else res_sharpen
+    
+    # 7. Laplacian (ksize = 3)
     res_laplacian = cv2.Laplacian(img, cv2.CV_64F, ksize=3)
     res_laplacian = cv2.convertScaleAbs(res_laplacian)
     res_lap_rgb = cv2.cvtColor(res_laplacian, cv2.COLOR_BGR2RGB) if len(res_laplacian.shape) == 3 else res_laplacian
+    
+    # 8. Sobel Magnitude (ksize = 3)
+    sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+    sobel_mag = cv2.magnitude(sobelx, sobely)
+    res_sobel = cv2.convertScaleAbs(sobel_mag)
+    res_sobel_rgb = cv2.cvtColor(res_sobel, cv2.COLOR_BGR2RGB) if len(res_sobel.shape) == 3 else res_sobel
+    
+    # 9. Chạm nổi (Emboss 3x3)
+    kernel_emboss = np.array([[-2, -1,  0],
+                              [-1,  1,  1],
+                              [ 0,  1,  2]], dtype=np.float32)
+    res_emboss_cv = cv2.filter2D(img, cv2.CV_64F, kernel_emboss)
+    res_emboss = cv2.convertScaleAbs(res_emboss_cv)
+    res_emboss_rgb = cv2.cvtColor(res_emboss, cv2.COLOR_BGR2RGB) if len(res_emboss.shape) == 3 else res_emboss
     
     filters = [
         ("Ảnh Gốc", res_orig),
         ("Average Blur 5x5", res_avg_rgb),
         ("Gaussian Blur 5x5", res_gauss_rgb),
-        ("Lọc Trung vị 5x5 (Median)", res_median_rgb),
+        ("Lọc Trung vị 5x5", res_median_rgb),
         ("Lọc 2 chiều (Bilateral)", res_bilateral_rgb),
-        ("Laplacian Edge Detection", res_lap_rgb)
+        ("Làm sắc nét (Sharpen)", res_sharpen_rgb),
+        ("Laplacian Edge", res_lap_rgb),
+        ("Sobel Edge", res_sobel_rgb),
+        ("Chạm nổi (Emboss)", res_emboss_rgb)
     ]
     
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
     axes = axes.flatten()
     
     for i, (name, res) in enumerate(filters):
