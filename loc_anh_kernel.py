@@ -190,10 +190,16 @@ def main():
         return
     path = file_path
         
-    # Đọc ảnh gốc
-    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    # Đọc ảnh gốc (Hỗ trợ đường dẫn có dấu Tiếng Việt/Unicode trên Windows)
+    try:
+        img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_COLOR)
+    except Exception as e:
+        print(f"Lỗi hệ thống khi đọc ảnh: {e}")
+        img = None
+        
     if img is None:
-        print(f"Lỗi: Không thể đọc được file ảnh tại '{path}'.")
+        print(f"Lỗi: Không thể đọc hoặc giải mã file ảnh tại '{path}'.")
+        print("Vui lòng kiểm tra tính toàn vẹn của tệp tin hoặc thử đường dẫn khác không có ký tự đặc biệt.")
         return
 
     while True:
